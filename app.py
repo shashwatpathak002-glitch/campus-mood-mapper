@@ -1,134 +1,331 @@
 #!/usr/bin/env python3
 """
-Campus Mood Mapper
+Campus Mood Mapper - Streamlit Version
 Created by: Shashwat Pathak
 Data Science Project for Sentiment Analysis and Mood Tracking
 """
 
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+import streamlit as st
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
 import json
-import os
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///campus_mood.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Page configuration
+st.set_page_config(
+    page_title="Campus Mood Mapper | Shashwat Pathak",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-db = SQLAlchemy(app)
+# Initialize session state for storing mood data
+if 'moods' not in st.session_state:
+    st.session_state.moods = []
 
-# Database Models
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    moods = db.relationship('Mood', backref='user', lazy=True)
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
 
-class Mood(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    mood_score = db.Column(db.Integer, nullable=False)
-    sentiment = db.Column(db.String(50))
-    comment = db.Column(db.Text)
-    location = db.Column(db.String(100))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+if 'username' not in st.session_state:
+    st.session_state.username = ""
 
-# Routes
-@app.route('/')
-def index():
-    return render_template('index.html', creator='Shashwat Pathak')
+# Custom CSS
+st.markdown("""
+<style>
+    .main-header {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #1f77b4;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    .sub-header {
+        font-size: 1.2rem;
+        color: #666;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .mood-card {
+        padding: 1.5rem;
+        border-radius: 10px;
+        background-color: #f0f2f6;
+        margin: 1rem 0;
+    }
+    .stat-card {
+        padding: 1rem;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
+# Header
+st.markdown('<p class="main-header">🎓 Campus Mood Mapper 📊</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Created by Shashwat Pathak</p>', unsafe_allow_html=True)
+
+# Sidebar
+with st.sidebar:
+    st.image("https://via.placeholder.com/150?text=Campus+Mood", use_column_width=True)
+    st.title("Navigation")
+    
+    if not st.session_state.logged_in:
+        page = st.radio("Go to", ["Home", "Login", "Register"])
+    else:
+        st.success(f"Welcome, {st.session_state.username}!")
+        page = st.radio("Go to", ["Dashboard", "Add Mood", "Analytics", "Export Data"])
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.session_state.username = ""
+            st.rerun()
+
+# Home Page
+if page == "Home":
+    st.write("")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div class="stat-card">
+            <h3>😊 Track Moods</h3>
+            <p>Monitor your daily emotional state</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="stat-card">
+            <h3>📈 Analyze Trends</h3>
+            <p>Discover patterns in your mood</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="stat-card">
+            <h3>🎯 Set Goals</h3>
+            <p>Improve your well-being</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.write("")
+    st.write("")
+    
+    st.subheader("About Campus Mood Mapper")
+    st.info("""
+    Campus Mood Mapper is a data science project designed to track and analyze mood patterns
+    on campus. Built with Streamlit, it provides an interactive dashboard for sentiment analysis
+    and mood tracking.
+    
+    **Features:**
+    - 🔐 User authentication
+    - 📊 Interactive mood tracking
+    - 📈 Data visualization
+    - 💾 Data export capabilities
+    - 🎨 Beautiful UI/UX
+    
+    **Created by:** Shashwat Pathak
+    **Project Type:** SY BSc Data Science Project
+    """)
+
+# Register Page
+elif page == "Register":
+    st.subheader("Create New Account")
+    
+    with st.form("register_form"):
+        new_username = st.text_input("Username")
+        new_email = st.text_input("Email")
+        new_password = st.text_input("Password", type="password")
+        confirm_password = st.text_input("Confirm Password", type="password")
         
-        hashed_password = generate_password_hash(password)
-        new_user = User(username=username, email=email, password_hash=hashed_password)
+        submit_button = st.form_submit_button("Register")
         
-        try:
-            db.session.add(new_user)
-            db.session.commit()
-            return redirect(url_for('login'))
-        except:
-            return 'Error creating user'
-    
-    return render_template('register.html')
+        if submit_button:
+            if not new_username or not new_email or not new_password:
+                st.error("Please fill in all fields")
+            elif new_password != confirm_password:
+                st.error("Passwords do not match")
+            else:
+                st.success(f"Account created for {new_username}! Please login.")
+                st.balloons()
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+# Login Page
+elif page == "Login":
+    st.subheader("Login to Your Account")
+    
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
         
-        user = User.query.filter_by(username=username).first()
+        login_button = st.form_submit_button("Login")
         
-        if user and check_password_hash(user.password_hash, password):
-            session['user_id'] = user.id
-            session['username'] = user.username
-            return redirect(url_for('dashboard'))
-        else:
-            return 'Invalid credentials'
-    
-    return render_template('login.html')
+        if login_button:
+            if username and password:
+                # Simple demo authentication
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Please enter username and password")
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('index'))
+# Dashboard Page
+elif page == "Dashboard":
+    st.subheader(f"📊 Your Mood Dashboard")
+    
+    if len(st.session_state.moods) == 0:
+        st.info("No mood entries yet. Start tracking your mood!")
+        st.image("https://via.placeholder.com/800x400?text=Start+Tracking+Your+Mood", use_column_width=True)
+    else:
+        df = pd.DataFrame(st.session_state.moods)
+        
+        # Statistics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Total Entries", len(df))
+        with col2:
+            st.metric("Average Mood", f"{df['mood_score'].mean():.1f}/10")
+        with col3:
+            st.metric("Best Mood", f"{df['mood_score'].max()}/10")
+        with col4:
+            st.metric("Lowest Mood", f"{df['mood_score'].min()}/10")
+        
+        st.write("")
+        
+        # Mood trend chart
+        fig = px.line(df, x='timestamp', y='mood_score', 
+                     title='Mood Trend Over Time',
+                     labels={'mood_score': 'Mood Score', 'timestamp': 'Date/Time'})
+        fig.update_traces(line_color='#667eea', line_width=3)
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Recent entries
+        st.subheader("Recent Mood Entries")
+        recent = df.tail(5).sort_values('timestamp', ascending=False)
+        for _, row in recent.iterrows():
+            with st.expander(f"🕐 {row['timestamp']} - Score: {row['mood_score']}/10"):
+                st.write(f"**Sentiment:** {row['sentiment']}")
+                st.write(f"**Comment:** {row['comment']}")
+                st.write(f"**Location:** {row['location']}")
 
-@app.route('/dashboard')
-def dashboard():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+# Add Mood Page
+elif page == "Add Mood":
+    st.subheader("Record Your Current Mood")
     
-    user_moods = Mood.query.filter_by(user_id=session['user_id']).all()
-    return render_template('dashboard.html', moods=user_moods, username=session['username'])
+    with st.form("mood_form"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            mood_score = st.slider("How are you feeling? (1-10)", 1, 10, 5)
+            sentiment = st.selectbox("Overall Sentiment", 
+                                    ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"])
+        
+        with col2:
+            location = st.text_input("Location (e.g., Library, Cafeteria)")
+            comment = st.text_area("Additional Comments (optional)")
+        
+        submit = st.form_submit_button("Submit Mood Entry")
+        
+        if submit:
+            mood_entry = {
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'mood_score': mood_score,
+                'sentiment': sentiment,
+                'comment': comment if comment else "No comment",
+                'location': location if location else "Unknown"
+            }
+            st.session_state.moods.append(mood_entry)
+            st.success("Mood entry recorded successfully! 🎉")
+            st.balloons()
 
-@app.route('/add_mood', methods=['POST'])
-def add_mood():
-    if 'user_id' not in session:
-        return jsonify({'error': 'Not logged in'}), 401
+# Analytics Page
+elif page == "Analytics":
+    st.subheader("📈 Mood Analytics")
     
-    data = request.get_json()
-    new_mood = Mood(
-        user_id=session['user_id'],
-        mood_score=data['mood_score'],
-        sentiment=data.get('sentiment', ''),
-        comment=data.get('comment', ''),
-        location=data.get('location', '')
-    )
-    
-    db.session.add(new_mood)
-    db.session.commit()
-    
-    return jsonify({'success': True, 'id': new_mood.id})
+    if len(st.session_state.moods) == 0:
+        st.warning("No data available for analytics. Start tracking your mood first!")
+    else:
+        df = pd.DataFrame(st.session_state.moods)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Sentiment distribution
+            sentiment_counts = df['sentiment'].value_counts()
+            fig1 = px.pie(values=sentiment_counts.values, 
+                         names=sentiment_counts.index,
+                         title='Sentiment Distribution',
+                         color_discrete_sequence=px.colors.sequential.RdBu)
+            st.plotly_chart(fig1, use_container_width=True)
+        
+        with col2:
+            # Mood score distribution
+            fig2 = px.histogram(df, x='mood_score', 
+                              title='Mood Score Distribution',
+                              labels={'mood_score': 'Mood Score'},
+                              color_discrete_sequence=['#667eea'])
+            st.plotly_chart(fig2, use_container_width=True)
+        
+        # Location analysis
+        if df['location'].nunique() > 1:
+            st.subheader("Mood by Location")
+            location_mood = df.groupby('location')['mood_score'].mean().sort_values(ascending=False)
+            fig3 = px.bar(x=location_mood.index, y=location_mood.values,
+                         title='Average Mood Score by Location',
+                         labels={'x': 'Location', 'y': 'Average Mood Score'},
+                         color=location_mood.values,
+                         color_continuous_scale='Viridis')
+            st.plotly_chart(fig3, use_container_width=True)
 
-@app.route('/export_data')
-def export_data():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+# Export Data Page
+elif page == "Export Data":
+    st.subheader("💾 Export Your Data")
     
-    user_moods = Mood.query.filter_by(user_id=session['user_id']).all()
-    data = [{
-        'timestamp': mood.timestamp,
-        'mood_score': mood.mood_score,
-        'sentiment': mood.sentiment,
-        'comment': mood.comment,
-        'location': mood.location
-    } for mood in user_moods]
-    
-    df = pd.DataFrame(data)
-    return df.to_json(orient='records')
+    if len(st.session_state.moods) == 0:
+        st.warning("No data to export")
+    else:
+        df = pd.DataFrame(st.session_state.moods)
+        
+        st.write(f"Total entries: {len(df)}")
+        st.write("")
+        
+        # Preview data
+        st.subheader("Data Preview")
+        st.dataframe(df, use_container_width=True)
+        
+        st.write("")
+        
+        # Export options
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            csv = df.to_csv(index=False)
+            st.download_button(
+                label="📥 Download as CSV",
+                data=csv,
+                file_name=f"mood_data_{st.session_state.username}_{datetime.now().strftime('%Y%m%d')}.csv",
+                mime="text/csv"
+            )
+        
+        with col2:
+            json_data = df.to_json(orient='records', indent=2)
+            st.download_button(
+                label="📥 Download as JSON",
+                data=json_data,
+                file_name=f"mood_data_{st.session_state.username}_{datetime.now().strftime('%Y%m%d')}.json",
+                mime="application/json"
+            )
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+# Footer
+st.write("")
+st.write("")
+st.markdown("---")
+st.markdown("""
+<div style='text-align: center; color: #666;'>
+    <p>Campus Mood Mapper | Created by <strong>Shashwat Pathak</strong></p>
+    <p>SY BSc Data Science Project | 2025</p>
+</div>
+""", unsafe_allow_html=True)
