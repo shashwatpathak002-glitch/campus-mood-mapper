@@ -1,3 +1,33 @@
 streamlit
 pandas
 plotly
+
+# Advanced features: NLP, sentiment analysis
+textblob
+vaderSentiment
+nltk
+
+# API and backend
+fastapi
+uvicorn
+python-multipart
+
+# Database
+SQLAlchemy
+Flask-SQLAlchemy
+
+# Data science and ML
+scikit-learn
+numpy
+
+# Safety and privacy
+python-dotenv
+bcrypt
+PyJWT
+
+# Visualization enhancements
+seaborn
+kaleido
+
+# Deployment
+gunicorn
