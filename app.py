@@ -11,6 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import json
+import time
 
 # Page configuration
 st.set_page_config(
@@ -213,7 +214,7 @@ elif page == "Dashboard":
 
 # Add Mood Page
 elif page == "Add Mood":
-    st.subheader("📝 How are you feeling right now?")
+    st.subheader("Record Your Current Mood")
     
     with st.form("mood_form"):
         col1, col2 = st.columns(2)
@@ -230,20 +231,22 @@ elif page == "Add Mood":
         submit = st.form_submit_button("Submit Mood Entry")
         
         if submit:
-            mood_entry = {
-                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'mood_score': mood_score,
-                'sentiment': sentiment,
-                'comment': comment if comment else "No comment",
-                'location': location if location else "Unknown"
-            }
-            st.session_state.moods.append(mood_entry)
+            with st.spinner("Recording your mood..."):
+                time.sleep(1)  # Simulate processing time
+                mood_entry = {
+                    'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'mood_score': mood_score,
+                    'sentiment': sentiment,
+                    'comment': comment if comment else "No comment",
+                    'location': location if location else "Unknown"
+                }
+                st.session_state.moods.append(mood_entry)
             st.success("Mood entry recorded successfully! 🎉")
             st.balloons()
 
 # Analytics Page
 elif page == "Analytics":
-    st.subheader("🔍 Your Mood Insights")
+    st.subheader("📈 Mood Analytics")
     
     if len(st.session_state.moods) == 0:
         st.warning("No data available for analytics. Start tracking your mood first!")
@@ -282,7 +285,7 @@ elif page == "Analytics":
 
 # Export Data Page
 elif page == "Export Data":
-    st.subheader("📤 Export Your Mood Journey")
+    st.subheader("💾 Export Your Data")
     
     if len(st.session_state.moods) == 0:
         st.warning("No data to export")
