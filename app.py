@@ -213,7 +213,7 @@ elif page == "Dashboard":
 
 # Add Mood Page
 elif page == "Add Mood":
-    st.subheader("Record Your Current Mood")
+    st.subheader("📝 How are you feeling right now?")
     
     with st.form("mood_form"):
         col1, col2 = st.columns(2)
@@ -243,7 +243,7 @@ elif page == "Add Mood":
 
 # Analytics Page
 elif page == "Analytics":
-    st.subheader("📈 Mood Analytics")
+    st.subheader("🔍 Your Mood Insights")
     
     if len(st.session_state.moods) == 0:
         st.warning("No data available for analytics. Start tracking your mood first!")
@@ -282,7 +282,7 @@ elif page == "Analytics":
 
 # Export Data Page
 elif page == "Export Data":
-    st.subheader("💾 Export Your Data")
+    st.subheader("📤 Export Your Mood Journey")
     
     if len(st.session_state.moods) == 0:
         st.warning("No data to export")
