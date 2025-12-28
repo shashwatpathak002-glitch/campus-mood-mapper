@@ -230,14 +230,15 @@ elif page == "Add Mood":
         submit = st.form_submit_button("Submit Mood Entry")
         
         if submit:
-            mood_entry = {
-                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'mood_score': mood_score,
-                'sentiment': sentiment,
-                'comment': comment if comment else "No comment",
-                'location': location if location else "Unknown"
-            }
-            st.session_state.moods.append(mood_entry)
+            with st.spinner("Recording your mood..."):
+                mood_entry = {
+                    'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'mood_score': mood_score,
+                    'sentiment': sentiment,
+                    'comment': comment if comment else "No comment",
+                    'location': location if location else "Unknown"
+                }
+                st.session_state.moods.append(mood_entry)
             st.success("Mood entry recorded successfully! 🎉")
             st.balloons()
 
