@@ -135,16 +135,17 @@ elif page == "Register":
     st.subheader("Create New Account")
     
     with st.form("register_form"):
-        new_username = st.text_input("Username")
-        new_email = st.text_input("Email")
-        new_password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        st.caption("Fields marked with * are required")
+        new_username = st.text_input("Username *")
+        new_email = st.text_input("Email *")
+        new_password = st.text_input("Password *", type="password")
+        confirm_password = st.text_input("Confirm Password *", type="password")
         
         submit_button = st.form_submit_button("Register")
         
         if submit_button:
-            if not new_username or not new_email or not new_password:
-                st.error("Please fill in all fields")
+            if not new_username or not new_email or not new_password or not confirm_password:
+                st.error("Please fill in all required fields.")
             elif new_password != confirm_password:
                 st.error("Passwords do not match")
             else:
@@ -156,20 +157,21 @@ elif page == "Login":
     st.subheader("Login to Your Account")
     
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        st.caption("Fields marked with * are required")
+        username = st.text_input("Username *")
+        password = st.text_input("Password *", type="password")
         
         login_button = st.form_submit_button("Login")
         
         if login_button:
-            if username and password:
+            if not username or not password:
+                st.error("Please fill in all required fields.")
+            else:
                 # Simple demo authentication
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.success("Login successful!")
                 st.rerun()
-            else:
-                st.error("Please enter username and password")
 
 # Dashboard Page
 elif page == "Dashboard":
