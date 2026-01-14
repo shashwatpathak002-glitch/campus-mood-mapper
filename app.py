@@ -133,18 +133,19 @@ if page == "Home":
 # Register Page
 elif page == "Register":
     st.subheader("Create New Account")
-    
+    st.caption("Fields marked with * are required.")
+
     with st.form("register_form"):
-        new_username = st.text_input("Username")
-        new_email = st.text_input("Email")
-        new_password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        new_username = st.text_input("Username *")
+        new_email = st.text_input("Email *")
+        new_password = st.text_input("Password *", type="password")
+        confirm_password = st.text_input("Confirm Password *", type="password")
         
         submit_button = st.form_submit_button("Register")
         
         if submit_button:
-            if not new_username or not new_email or not new_password:
-                st.error("Please fill in all fields")
+            if not new_username or not new_email or not new_password or not confirm_password:
+                st.error("Please fill in all required fields")
             elif new_password != confirm_password:
                 st.error("Passwords do not match")
             else:
