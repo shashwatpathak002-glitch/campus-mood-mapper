@@ -135,10 +135,11 @@ elif page == "Register":
     st.subheader("Create New Account")
     
     with st.form("register_form"):
-        new_username = st.text_input("Username")
-        new_email = st.text_input("Email")
-        new_password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        st.caption("Fields marked with an asterisk (*) are required.")
+        new_username = st.text_input("Username *")
+        new_email = st.text_input("Email *")
+        new_password = st.text_input("Password *", type="password")
+        confirm_password = st.text_input("Confirm Password *", type="password")
         
         submit_button = st.form_submit_button("Register")
         
@@ -156,8 +157,9 @@ elif page == "Login":
     st.subheader("Login to Your Account")
     
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        st.caption("Fields marked with an asterisk (*) are required.")
+        username = st.text_input("Username *")
+        password = st.text_input("Password *", type="password")
         
         login_button = st.form_submit_button("Login")
         
