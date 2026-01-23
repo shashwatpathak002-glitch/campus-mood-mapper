@@ -133,20 +133,21 @@ if page == "Home":
 # Register Page
 elif page == "Register":
     st.subheader("Create New Account")
-    
+
     with st.form("register_form"):
-        new_username = st.text_input("Username")
-        new_email = st.text_input("Email")
-        new_password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
-        
+        st.caption("Required fields are marked with an asterisk (*)")
+        new_username = st.text_input("Username *")
+        new_email = st.text_input("Email *")
+        new_password = st.text_input("Password *", type="password")
+        confirm_password = st.text_input("Confirm Password *", type="password")
+
         submit_button = st.form_submit_button("Register")
-        
+
         if submit_button:
-            if not new_username or not new_email or not new_password:
-                st.error("Please fill in all fields")
+            if not new_username or not new_email or not new_password or not confirm_password:
+                st.error("Please fill in all required fields.")
             elif new_password != confirm_password:
-                st.error("Passwords do not match")
+                st.error("Passwords do not match.")
             else:
                 st.success(f"Account created for {new_username}! Please login.")
                 st.balloons()
@@ -154,22 +155,23 @@ elif page == "Register":
 # Login Page
 elif page == "Login":
     st.subheader("Login to Your Account")
-    
+
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        
+        st.caption("Required fields are marked with an asterisk (*)")
+        username = st.text_input("Username *")
+        password = st.text_input("Password *", type="password")
+
         login_button = st.form_submit_button("Login")
-        
+
         if login_button:
-            if username and password:
+            if not username or not password:
+                st.error("Please fill in all required fields.")
+            else:
                 # Simple demo authentication
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.success("Login successful!")
                 st.rerun()
-            else:
-                st.error("Please enter username and password")
 
 # Dashboard Page
 elif page == "Dashboard":
@@ -214,32 +216,36 @@ elif page == "Dashboard":
 # Add Mood Page
 elif page == "Add Mood":
     st.subheader("Record Your Current Mood")
-    
+
     with st.form("mood_form"):
+        st.caption("Required fields are marked with an asterisk (*)")
         col1, col2 = st.columns(2)
-        
+
         with col1:
             mood_score = st.slider("How are you feeling? (1-10)", 1, 10, 5)
-            sentiment = st.selectbox("Overall Sentiment", 
-                                    ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"])
-        
+            sentiment = st.selectbox("Overall Sentiment",
+                                     ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"])
+
         with col2:
-            location = st.text_input("Location (e.g., Library, Cafeteria)")
+            location = st.text_input("Location (e.g., Library, Cafeteria) *")
             comment = st.text_area("Additional Comments (optional)")
-        
+
         submit = st.form_submit_button("Submit Mood Entry")
-        
+
         if submit:
-            mood_entry = {
-                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'mood_score': mood_score,
-                'sentiment': sentiment,
-                'comment': comment if comment else "No comment",
-                'location': location if location else "Unknown"
-            }
-            st.session_state.moods.append(mood_entry)
-            st.success("Mood entry recorded successfully! 🎉")
-            st.balloons()
+            if not location:
+                st.error("Please fill in all required fields.")
+            else:
+                mood_entry = {
+                    'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'mood_score': mood_score,
+                    'sentiment': sentiment,
+                    'comment': comment if comment else "No comment",
+                    'location': location
+                }
+                st.session_state.moods.append(mood_entry)
+                st.success("Mood entry recorded successfully! 🎉")
+                st.balloons()
 
 # Analytics Page
 elif page == "Analytics":
