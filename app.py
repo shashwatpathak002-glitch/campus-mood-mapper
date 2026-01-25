@@ -133,12 +133,13 @@ if page == "Home":
 # Register Page
 elif page == "Register":
     st.subheader("Create New Account")
-    
+    st.caption("Fields marked with * are required")
+
     with st.form("register_form"):
-        new_username = st.text_input("Username")
-        new_email = st.text_input("Email")
-        new_password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        new_username = st.text_input("Username *")
+        new_email = st.text_input("Email *")
+        new_password = st.text_input("Password *", type="password")
+        confirm_password = st.text_input("Confirm Password *", type="password")
         
         submit_button = st.form_submit_button("Register")
         
@@ -154,10 +155,11 @@ elif page == "Register":
 # Login Page
 elif page == "Login":
     st.subheader("Login to Your Account")
+    st.caption("Fields marked with * are required")
     
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        username = st.text_input("Username *")
+        password = st.text_input("Password *", type="password")
         
         login_button = st.form_submit_button("Login")
         
