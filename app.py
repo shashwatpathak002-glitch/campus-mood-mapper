@@ -76,7 +76,7 @@ with st.sidebar:
     else:
         st.success(f"Welcome, {st.session_state.username}!")
         page = st.radio("Go to", ["Dashboard", "Add Mood", "Analytics", "Export Data"])
-        if st.button("Logout"):
+        if st.button("🚪 Logout"):
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.rerun()
@@ -133,12 +133,13 @@ if page == "Home":
 # Register Page
 elif page == "Register":
     st.subheader("Create New Account")
+    st.caption("Fields marked with an asterisk (*) are required.")
     
     with st.form("register_form"):
-        new_username = st.text_input("Username")
-        new_email = st.text_input("Email")
-        new_password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        new_username = st.text_input("Username *", help="Choose a unique username for your account")
+        new_email = st.text_input("Email *", help="Enter a valid email address")
+        new_password = st.text_input("Password *", type="password", help="Create a secure password")
+        confirm_password = st.text_input("Confirm Password *", type="password", help="Please re-type your password to confirm")
         
         submit_button = st.form_submit_button("Register")
         
@@ -156,8 +157,8 @@ elif page == "Login":
     st.subheader("Login to Your Account")
     
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        username = st.text_input("Username *", help="Enter your registered username")
+        password = st.text_input("Password *", type="password", help="Enter your account password")
         
         login_button = st.form_submit_button("Login")
         
@@ -214,18 +215,24 @@ elif page == "Dashboard":
 # Add Mood Page
 elif page == "Add Mood":
     st.subheader("Record Your Current Mood")
+    st.markdown("Please fill in your current emotional state. Fields marked with an asterisk (*) are required.")
     
     with st.form("mood_form"):
         col1, col2 = st.columns(2)
         
         with col1:
-            mood_score = st.slider("How are you feeling? (1-10)", 1, 10, 5)
-            sentiment = st.selectbox("Overall Sentiment", 
-                                    ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"])
+            mood_score = st.slider("How are you feeling? (1-10) *", 1, 10, 5,
+                                help="Select a number: 1 (Lowest) to 10 (Highest)")
+            sentiment = st.selectbox("Overall Sentiment *",
+                                    ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"],
+                                    help="Choose the sentiment that best matches your mood")
         
         with col2:
-            location = st.text_input("Location (e.g., Library, Cafeteria)")
-            comment = st.text_area("Additional Comments (optional)")
+            location = st.text_input("Location (e.g., Library, Cafeteria)",
+                                    help="Where are you currently on campus? (Optional)")
+            comment = st.text_area("Additional Comments (optional)",
+                                  max_chars=500,
+                                  help="Share more details about your feelings (Optional, max 500 characters)")
         
         submit = st.form_submit_button("Submit Mood Entry")
         
