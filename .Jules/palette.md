@@ -1,0 +1,3 @@
+## 2025-02-03 - [Streamlit Deprecation & Accessibility]
+**Learning:** `use_column_width=True` is deprecated in Streamlit; `use_container_width=True` should be used instead. Also, adding `help` tooltips to `st.text_input` and other widgets creates a "?" icon that serves as both a visual guide and an ARIA label "Help for [Label]", which can cause selector ambiguity in Playwright if not handled with specific roles (e.g., `get_by_role("textbox", name="Label")`).
+**Action:** Always use `use_container_width=True` for images/charts. When verifying with Playwright, use role-based locators to avoid "strict mode violation" between the widget and its help tooltip.
