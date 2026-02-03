@@ -68,7 +68,7 @@ st.markdown('<p class="sub-header">Created by Shashwat Pathak</p>', unsafe_allow
 
 # Sidebar
 with st.sidebar:
-    st.image("https://via.placeholder.com/150?text=Campus+Mood", use_column_width=True)
+    st.image("https://via.placeholder.com/150?text=Campus+Mood", use_container_width=True)
     st.title("Navigation")
     
     if not st.session_state.logged_in:
@@ -76,7 +76,7 @@ with st.sidebar:
     else:
         st.success(f"Welcome, {st.session_state.username}!")
         page = st.radio("Go to", ["Dashboard", "Add Mood", "Analytics", "Export Data"])
-        if st.button("Logout"):
+        if st.button("🚪 Logout"):
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.rerun()
@@ -133,14 +133,15 @@ if page == "Home":
 # Register Page
 elif page == "Register":
     st.subheader("Create New Account")
+    st.caption("Fields marked with an asterisk (*) are required.")
     
     with st.form("register_form"):
-        new_username = st.text_input("Username")
-        new_email = st.text_input("Email")
-        new_password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        new_username = st.text_input("Username *", help="Choose a unique username for your account")
+        new_email = st.text_input("Email *", help="Enter your university or personal email address")
+        new_password = st.text_input("Password *", type="password", help="Create a strong password (minimum 8 characters recommended)")
+        confirm_password = st.text_input("Confirm Password *", type="password", help="Re-enter your password to verify")
         
-        submit_button = st.form_submit_button("Register")
+        submit_button = st.form_submit_button("✨ Register")
         
         if submit_button:
             if not new_username or not new_email or not new_password:
@@ -156,10 +157,10 @@ elif page == "Login":
     st.subheader("Login to Your Account")
     
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        username = st.text_input("Username", help="Enter your registered username")
+        password = st.text_input("Password", type="password", help="Enter your account password")
         
-        login_button = st.form_submit_button("Login")
+        login_button = st.form_submit_button("🔑 Login")
         
         if login_button:
             if username and password:
@@ -177,7 +178,7 @@ elif page == "Dashboard":
     
     if len(st.session_state.moods) == 0:
         st.info("No mood entries yet. Start tracking your mood!")
-        st.image("https://via.placeholder.com/800x400?text=Start+Tracking+Your+Mood", use_column_width=True)
+        st.image("https://via.placeholder.com/800x400?text=Start+Tracking+Your+Mood", use_container_width=True)
     else:
         df = pd.DataFrame(st.session_state.moods)
         
@@ -214,32 +215,41 @@ elif page == "Dashboard":
 # Add Mood Page
 elif page == "Add Mood":
     st.subheader("Record Your Current Mood")
+    st.caption("Fields marked with an asterisk (*) are required.")
     
     with st.form("mood_form"):
         col1, col2 = st.columns(2)
         
         with col1:
-            mood_score = st.slider("How are you feeling? (1-10)", 1, 10, 5)
-            sentiment = st.selectbox("Overall Sentiment", 
-                                    ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"])
+            mood_score = st.slider("How are you feeling? (1-10) *", 1, 10, 5,
+                                  help="Select your current mood score from 1 (lowest) to 10 (highest)")
+            sentiment = st.selectbox("Overall Sentiment *",
+                                    ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"],
+                                    help="Choose the sentiment that best describes your current state")
         
         with col2:
-            location = st.text_input("Location (e.g., Library, Cafeteria)")
-            comment = st.text_area("Additional Comments (optional)")
+            location = st.text_input("Location * (e.g., Library, Cafeteria)",
+                                    help="Where are you currently on campus?")
+            comment = st.text_area("Additional Comments (optional)",
+                                  max_chars=200,
+                                  help="Any other details about your mood? (Max 200 characters)")
         
-        submit = st.form_submit_button("Submit Mood Entry")
+        submit = st.form_submit_button("📝 Submit Mood Entry")
         
         if submit:
-            mood_entry = {
-                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'mood_score': mood_score,
-                'sentiment': sentiment,
-                'comment': comment if comment else "No comment",
-                'location': location if location else "Unknown"
-            }
-            st.session_state.moods.append(mood_entry)
-            st.success("Mood entry recorded successfully! 🎉")
-            st.balloons()
+            if not location:
+                st.error("Please provide your location.")
+            else:
+                mood_entry = {
+                    'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'mood_score': mood_score,
+                    'sentiment': sentiment,
+                    'comment': comment if comment else "No comment",
+                    'location': location
+                }
+                st.session_state.moods.append(mood_entry)
+                st.success("Mood entry recorded successfully! 🎉")
+                st.balloons()
 
 # Analytics Page
 elif page == "Analytics":
