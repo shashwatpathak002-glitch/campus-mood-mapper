@@ -68,7 +68,7 @@ st.markdown('<p class="sub-header">Created by Shashwat Pathak</p>', unsafe_allow
 
 # Sidebar
 with st.sidebar:
-    st.image("https://via.placeholder.com/150?text=Campus+Mood", use_column_width=True)
+    st.image("https://via.placeholder.com/150?text=Campus+Mood", use_container_width=True)
     st.title("Navigation")
     
     if not st.session_state.logged_in:
@@ -135,12 +135,13 @@ elif page == "Register":
     st.subheader("Create New Account")
     
     with st.form("register_form"):
-        new_username = st.text_input("Username")
-        new_email = st.text_input("Email")
-        new_password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        new_username = st.text_input("Username *", help="Choose a unique campus username")
+        new_email = st.text_input("Email *", help="Use your campus email address")
+        new_password = st.text_input("Password *", type="password", help="Create a strong password (min. 8 characters)")
+        confirm_password = st.text_input("Confirm Password *", type="password", help="Re-type your password to confirm")
         
-        submit_button = st.form_submit_button("Register")
+        submit_button = st.form_submit_button("Register", use_container_width=True)
+        st.caption("* Required fields")
         
         if submit_button:
             if not new_username or not new_email or not new_password:
@@ -156,10 +157,11 @@ elif page == "Login":
     st.subheader("Login to Your Account")
     
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        username = st.text_input("Username *", help="Enter your campus username")
+        password = st.text_input("Password *", type="password", help="Enter your secure password")
         
-        login_button = st.form_submit_button("Login")
+        login_button = st.form_submit_button("Login", use_container_width=True)
+        st.caption("* Required fields")
         
         if login_button:
             if username and password:
@@ -219,15 +221,21 @@ elif page == "Add Mood":
         col1, col2 = st.columns(2)
         
         with col1:
-            mood_score = st.slider("How are you feeling? (1-10)", 1, 10, 5)
+            mood_score = st.slider("How are you feeling? (1-10)", 1, 10, 5,
+                                  help="1 is very low, 10 is excellent!")
             sentiment = st.selectbox("Overall Sentiment", 
-                                    ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"])
+                                    ["😫 Very Negative", "☹️ Negative", "😐 Neutral", "🙂 Positive", "🤩 Very Positive"],
+                                    help="Choose the sentiment that best matches your mood.")
         
         with col2:
-            location = st.text_input("Location (e.g., Library, Cafeteria)")
-            comment = st.text_area("Additional Comments (optional)")
+            location = st.text_input("Location *", placeholder="e.g., Library, Cafeteria",
+                                   help="Where are you right now?")
+            comment = st.text_area("Additional Comments (optional)", max_chars=500,
+                                 placeholder="Tell us more about how you feel...",
+                                 help="Share any thoughts or details about your current mood.")
         
-        submit = st.form_submit_button("Submit Mood Entry")
+        submit = st.form_submit_button("Submit Mood Entry", use_container_width=True)
+        st.caption("* Required fields")
         
         if submit:
             mood_entry = {
